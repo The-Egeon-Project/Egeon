@@ -9,8 +9,8 @@ const client = new Client({
   ],
 });
 
-client.on('clientReady', () => {
-  console.log(`Bot logueado como ${client.user?.tag}`);
+client.on('ready', () => {
+  console.log(`Bot logged in as ${client.user?.tag}`);
 });
 
 client.on('messageCreate', (msg) => {
@@ -22,3 +22,13 @@ client.on('messageCreate', (msg) => {
 });
 
 client.login(process.env.DISCORD_TOKEN);
+
+const shutdown = () => {
+  console.log('\nShutting down bot...');
+  client.destroy();
+  process.exit(0);
+};
+
+// Graceful shutdown
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);

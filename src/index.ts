@@ -9,7 +9,7 @@ const client = new Client({
   ],
 });
 
-client.on('ready', () => {
+client.on('clientReady', () => {
   console.log(`Bot logueado como ${client.user?.tag}`);
 });
 

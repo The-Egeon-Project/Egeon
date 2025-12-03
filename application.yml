@@ -1,29 +1,32 @@
 server:
   port: 2333
+  address: 127.0.0.1
+  http2:
+    enabled: false
 lavalink:
   server:
     password: "youshallnotpass"
     sources:
       youtube: false
+      youtubeSearchEnabled: false
   plugins:
     - dependency: "dev.lavalink.youtube:youtube-plugin:1.16.0"
       repository: "https://maven.lavalink.dev/releases"
-
 plugins:
   youtube:
     enabled: true
     allowSearch: true
     allowDirectVideoIds: true
     allowDirectPlaylistIds: true
-    # Clientes que se usarán para obtener datos de YouTube
-    # MUSIC y WEB son los más confiables actualmente
     clients:
-      - MUSIC
+      - MWEB
       - WEB
-      - ANDROID_TESTSUITE
-    
-    # --- OAuth Configuration (Recomendado) ---
-    # OAuth permite usar una cuenta de Google para evitar restricciones de edad
-    # y problemas de "sign in to confirm you're not a bot"
+      - MUSIC
+      - WEBEMBEDDED
+      - ANDROID_VR
+      - TV
+      - TVHTML5EMBEDDED
     oauth:
       enabled: true
+      skipInitialization: true
+      refreshToken: "1//0hY-CJyqSGOJOCgYIARAAGBESNwF-L9IrPuufIDXvGIe5Nvw8OPHgr6bP0o9Fr0KOb0MfZgsLUtIrs3UXqBGGgzK38y7vLF--_wQ"

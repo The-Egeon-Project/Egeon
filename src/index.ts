@@ -36,17 +36,21 @@ client.on('clientReady', () => console.log(client.user?.tag + ' Ready!'));
 kazagumo.shoukaku.on('ready', (name) =>
   console.log(`Lavalink ${name}: Ready!`),
 );
+
 kazagumo.shoukaku.on('error', (name, error) =>
   console.error(`Lavalink ${name}: Error Caught,`, error),
 );
+
 kazagumo.shoukaku.on('close', (name, code, reason) =>
   console.warn(
     `Lavalink ${name}: Closed, Code ${code}, Reason ${reason || 'No reason'}`,
   ),
 );
+
 kazagumo.shoukaku.on('debug', (name, info) =>
   console.debug(`Lavalink ${name}: Debug,`, info),
 );
+
 kazagumo.shoukaku.on('disconnect', (name, count) => {
   const players = [...kazagumo.shoukaku.players.values()].filter(
     (p) => p.node.name === name,
@@ -56,30 +60,6 @@ kazagumo.shoukaku.on('disconnect', (name, count) => {
     player.destroy();
   });
   console.warn(`Lavalink ${name}: Disconnected`);
-});
-
-kazagumo.on('playerStart', (player, track) => {
-  const channel = client.channels.cache.get(player.textId!) as any;
-  if (!channel) return;
-
-  channel
-    .send({ content: `Now playing **${track.title}** by **${track.author}**` })
-    .then((message: any) => player.data.set('message', message));
-});
-
-kazagumo.on('playerEnd', (player) => {
-  player.data.get('message')?.edit({ content: `Finished playing` });
-});
-
-kazagumo.on('playerEmpty', (player) => {
-  const channel = client.channels.cache.get(player.textId!) as any;
-  if (!channel) return;
-
-  channel
-    .send({ content: `Destroyed player due to inactivity.` })
-    .then((message: any) => player.data.set('message', message));
-
-  player.destroy();
 });
 
 client.on('messageCreate', async (message) => {
@@ -99,16 +79,16 @@ client.on('messageCreate', async (message) => {
       guildId: message.guild.id,
       textId: message.channel.id,
       voiceId: channel.id,
-      volume: 40,
     });
 
     let result = await kazagumo.search(query, { requester: message.author });
-    if (result.tracks[0] === undefined)
-      return message.reply('No results found!');
+    const track = result.tracks[0];
+
+    if (!track) return message.reply('No results found!');
 
     if (result.type === 'PLAYLIST')
       player.queue.add(result.tracks); // do this instead of using for loop if you want queueUpdate not spammy
-    else player.queue.add(result.tracks[0]);
+    else player.queue.add(track);
 
     if (!player.playing && !player.paused) player.play();
 
@@ -116,7 +96,7 @@ client.on('messageCreate', async (message) => {
       content:
         result.type === 'PLAYLIST'
           ? `Queued ${result.tracks.length} from ${result.playlistName}`
-          : `Queued ${result.tracks[0].title}`,
+          : `Queued ${track.title}`,
     });
   }
 
@@ -131,17 +111,21 @@ client.on('messageCreate', async (message) => {
     });
   }
 
-  if (message.content.startsWith('!forceplay')) {
+  if (
+    message.content.startsWith('!forceplay') ||
+    message.content.startsWith('!fp')
+  ) {
     let player = kazagumo.players.get(message.guild.id);
     if (!player) return message.reply('No player found!');
     const args = message.content.split(' ');
     const query = args.slice(1).join(' ');
     let result = await kazagumo.search(query, { requester: message.author });
-    const track = result.tracks[0] as any;
+    const track = result.tracks[0];
 
-    if (track === undefined) return message.reply('No results found!');
+    if (!track) return message.reply('No results found!');
 
-    player.play(new KazagumoTrack(track.getRaw(), message.author));
+    player.play(track);
+
     return message.reply({
       content: `Forced playing **${track.title}** by **${track.author}**`,
     });

@@ -65,7 +65,10 @@ kazagumo.shoukaku.on('disconnect', (name, count) => {
 client.on('messageCreate', async (message) => {
   if (message.author.bot || !message.guild || !message.member) return;
 
-  if (message.content.startsWith('!p') || message.content.startsWith('!play')) {
+  if (
+    message.content.startsWith('!p ') ||
+    message.content.startsWith('!play ')
+  ) {
     const args = message.content.split(' ');
     const query = args.slice(1).join(' ');
 
@@ -138,6 +141,27 @@ client.on('messageCreate', async (message) => {
     if (!previous) return message.reply('No previous track found!');
     await player.play(player.getPrevious(true)); // now we remove the previous track and play it
     return message.reply('Previous!');
+  }
+
+  if (
+    message.content.startsWith('!pause') ||
+    message.content.startsWith('!stop')
+  ) {
+    let player = kazagumo.players.get(message.guild.id);
+    if (!player) return message.reply('No player found!');
+    player.pause(true);
+
+    return message.reply('Paused!');
+  }
+
+  if (
+    message.content.startsWith('!resume') ||
+    message.content.startsWith('!unpause')
+  ) {
+    let player = kazagumo.players.get(message.guild.id);
+    if (!player) return message.reply('No player found!');
+    player.pause(false);
+    return message.reply('Resumed!');
   }
 });
 

@@ -20,4 +20,4 @@ USER lavalink
 
 EXPOSE 2333
 
-CMD ["java", "-Djdk.tls.client.protocols=TLSv1.2", "-jar", "Lavalink.jar"]
+CMD ["java", "-Xms128m", "-Xmx256m", "-XX:+UseG1GC", "-XX:MaxGCPauseMillis=50", "-Djdk.tls.client.protocols=TLSv1.2", "-jar", "Lavalink.jar"]

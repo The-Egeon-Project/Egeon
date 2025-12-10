@@ -29,9 +29,6 @@ Dockerfile
 docker-compose*.yml
 .dockerignore
 
-# Lavalink (se maneja por separado)
-Lavalink/
-
 # Otros
 README.md
 LICENSE

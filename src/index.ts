@@ -1,10 +1,21 @@
 import { Client, GatewayIntentBits } from 'discord.js';
-import 'dotenv/config';
+import dotenv from 'dotenv';
 import { Kazagumo, KazagumoTrack } from 'kazagumo';
 import { Connectors, NodeOption } from 'shoukaku';
 
+// Cargar .env solo si existe (desarrollo local)
+dotenv.config();
+
 const { Guilds, GuildVoiceStates, GuildMessages, MessageContent } =
   GatewayIntentBits;
+
+// Debug: verificar que las variables de entorno están cargadas
+console.log('Environment check:', {
+  DISCORD_TOKEN: process.env.DISCORD_TOKEN ? '✓ Set' : '✗ Missing',
+  LAVALINK_NAME: process.env.LAVALINK_NAME ? '✓ Set' : '✗ Missing',
+  LAVALINK_URL: process.env.LAVALINK_URL ? '✓ Set' : '✗ Missing',
+  LAVALINK_PASSWORD: process.env.LAVALINK_PASSWORD ? '✓ Set' : '✗ Missing',
+});
 
 const Nodes = [
   {

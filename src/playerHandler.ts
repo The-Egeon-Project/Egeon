@@ -1,33 +1,60 @@
-import { Message } from 'discord.js';
 import { Kazagumo, KazagumoPlayer } from 'kazagumo';
 
+import { Message } from './messages';
 import { MESSAGES } from './messages';
 
 export class PlayerHandler {
   constructor(private readonly kazagumo: Kazagumo) {
     this.kazagumo = kazagumo;
   }
-
   getPlayer(message: Message): KazagumoPlayer | undefined {
-    return this.kazagumo.players.get(message.guild!.id);
+    return this.kazagumo.players.get(message.guild.id);
   }
 
-  handleMessage(message: Message) {
-    if (!message.guild) return;
-    if (!message.member) return;
-    if (!message.member.voice.channel) return;
-    if (!message.member.voice.channel.id) return;
-    if (!message.member.voice.channel.id) return;
-  }
+  // Player Functions
+  async play(message: Message) {
+    const args = message.content.split(' ');
+    const query = args.slice(1).join(' ');
 
-  handleNoPlayerFound(message: Message) {
-    return message.reply('No player found!');
+    const { channel } = message.member.voice;
+    if (!channel)
+      return message.reply(
+        'You need to be in a voice channel to use this command!',
+      );
+
+    let player = this.getPlayer(message);
+
+    if (!player) {
+      player = await this.kazagumo.createPlayer({
+        guildId: message.guild.id,
+        textId: message.channel.id,
+        voiceId: channel.id,
+      });
+    }
+
+    const result = await this.kazagumo.search(query, {
+      requester: message.author,
+    });
+    const track = result.tracks[0];
+    if (!track) return message.reply('No results found!');
+
+    if (result.type === 'PLAYLIST')
+      player.queue.add(result.tracks); // do this instead of using for loop if you want queueUpdate not spammy
+    else player.queue.add(track);
+
+    if (!player.playing && !player.paused) player.play();
+
+    return message.reply({
+      content:
+        result.type === 'PLAYLIST'
+          ? `Queued ${result.tracks.length} from ${result.playlistName}`
+          : `Queued ${track.title}`,
+    });
   }
 
   skip(message: Message) {
-    this.handleMessage(message);
-
     const player = this.getPlayer(message);
+
     if (!player) {
       return message.reply(MESSAGES.NO_PLAYER_FOUND);
     }
@@ -43,53 +70,33 @@ export class PlayerHandler {
     });
   }
 
-  // if (
-  //   message.content.startsWith('!forceplay') ||
-  //   message.content.startsWith('!fp')
-  // ) {
-  //   let player = kazagumo.players.get(message.guild.id);
-  //   if (!player) return message.reply('No player found!');
-  //   const args = message.content.split(' ');
-  //   const query = args.slice(1).join(' ');
-  //   let result = await kazagumo.search(query, { requester: message.author });
-  //   const track = result.tracks[0];
+  disconnect(message: Message) {
+    const player = this.getPlayer(message);
 
-  //   if (!track) return message.reply('No results found!');
+    if (!player) {
+      return message.reply(MESSAGES.NO_PLAYER_FOUND);
+    }
 
-  //   player.play(track);
+    player.destroy();
 
-  //   return message.reply({
-  //     content: `Forced playing **${track.title}** by **${track.author}**`,
-  //   });
-  // }
+    return message.reply('Disconnected!');
+  }
 
-  // if (message.content.startsWith('!previous')) {
-  //   let player = kazagumo.players.get(message.guild.id);
-  //   if (!player) return message.reply('No player found!');
-  //   const previous = player.getPrevious(); // we get the previous track without removing it first
-  //   if (!previous) return message.reply('No previous track found!');
-  //   await player.play(player.getPrevious(true)); // now we remove the previous track and play it
-  //   return message.reply('Previous!');
-  // }
+  pause(message: Message) {
+    const player = this.getPlayer(message);
+    if (!player) {
+      return message.reply(MESSAGES.NO_PLAYER_FOUND);
+    }
+    player.pause(true);
+    return message.reply('Paused!');
+  }
 
-  // if (
-  //   message.content.startsWith('!pause') ||
-  //   message.content.startsWith('!stop')
-  // ) {
-  //   let player = kazagumo.players.get(message.guild.id);
-  //   if (!player) return message.reply('No player found!');
-  //   player.pause(true);
-
-  //   return message.reply('Paused!');
-  // }
-
-  // if (
-  //   message.content.startsWith('!resume') ||
-  //   message.content.startsWith('!unpause')
-  // ) {
-  //   let player = kazagumo.players.get(message.guild.id);
-  //   if (!player) return message.reply('No player found!');
-  //   player.pause(false);
-  //   return message.reply('Resumed!');
-  // }
+  resume(message: Message) {
+    const player = this.getPlayer(message);
+    if (!player) {
+      return message.reply(MESSAGES.NO_PLAYER_FOUND);
+    }
+    player.pause(false);
+    return message.reply('Resumed!');
+  }
 }

@@ -1,9 +1,14 @@
-import { Client, GatewayIntentBits } from 'discord.js';
+import {
+  Client,
+  Message as DiscordMessage,
+  GatewayIntentBits,
+} from 'discord.js';
 import dotenv from 'dotenv';
 import { Kazagumo } from 'kazagumo';
 import { Connectors, NodeOption } from 'shoukaku';
 
 import { Command, getCommand, getIsCommand } from './commands';
+import { MESSAGES, Message, getIsValidDiscordMessage } from './messages';
 import { PlayerHandler } from './playerHandler';
 
 // Load .env only if it exists (local development)
@@ -71,65 +76,32 @@ kazagumo.shoukaku.on('disconnect', (name, count) => {
   console.warn(`Lavalink ${name}: Disconnected`);
 });
 
-client.on('messageCreate', async (message) => {
-  if (message.author.bot || !message.guild || !message.member) return;
+client.on('messageCreate', async (discordMessage: DiscordMessage) => {
+  const isValidDiscordMessage = getIsValidDiscordMessage(discordMessage);
+  if (!isValidDiscordMessage) return;
 
-  if (
-    message.content.startsWith('!p ') ||
-    message.content.startsWith('!play ')
-  ) {
-    const args = message.content.split(' ');
-    const query = args.slice(1).join(' ');
-
-    const { channel } = message.member.voice;
-    if (!channel)
-      return message.reply(
-        'You need to be in a voice channel to use this command!',
-      );
-
-    let player = await kazagumo.createPlayer({
-      guildId: message.guild.id,
-      textId: message.channel.id,
-      voiceId: channel.id,
-    });
-
-    let result = await kazagumo.search(query, { requester: message.author });
-    const track = result.tracks[0];
-
-    if (!track) return message.reply('No results found!');
-
-    if (result.type === 'PLAYLIST')
-      player.queue.add(result.tracks); // do this instead of using for loop if you want queueUpdate not spammy
-    else player.queue.add(track);
-
-    if (!player.playing && !player.paused) player.play();
-
-    return message.reply({
-      content:
-        result.type === 'PLAYLIST'
-          ? `Queued ${result.tracks.length} from ${result.playlistName}`
-          : `Queued ${track.title}`,
-    });
-  }
-
+  const message = discordMessage as Message;
   const isCommand = getIsCommand(message);
+  const command = getCommand(message);
 
-  if (isCommand) {
-    const command = getCommand(message);
+  if (!isCommand || !command) return;
+  const playerHandler = new PlayerHandler(kazagumo);
 
-    if (!command) return;
-    const playerHandler = new PlayerHandler(kazagumo);
-
-    switch (command) {
-      case Command.HAND_SHAKE:
-        return message.reply('Hi!');
-      case Command.SKIP:
-        return playerHandler.skip(message);
-      default:
-        return message.reply(
-          `Unknown command: ${command}.\nPlease provide a valid command.`,
-        );
-    }
+  switch (command) {
+    case Command.HAND_SHAKE:
+      return message.reply('Hi!'); //Just health check status of the bot.
+    case Command.PLAY:
+      return playerHandler.play(message);
+    case Command.DISCONNECT:
+      return playerHandler.disconnect(message);
+    case Command.SKIP:
+      return playerHandler.skip(message);
+    case Command.PAUSE:
+      return playerHandler.pause(message);
+    case Command.RESUME:
+      return playerHandler.resume(message);
+    default:
+      return message.reply(MESSAGES.UNKNOWN_COMMAND);
   }
 });
 

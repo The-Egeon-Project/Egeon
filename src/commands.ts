@@ -1,6 +1,7 @@
 import { Message } from 'discord.js';
 
 export enum Command {
+  HAND_SHAKE = 'hs',
   PLAY = 'play',
   SKIP = 'skip',
   STOP = 'stop',
@@ -18,8 +19,18 @@ export function getIsCommand(message: Message) {
   return message.content.startsWith('!');
 }
 
-export function getCommand(message: Message): Command | null {
-  const [_, command] = message.content.split('!');
+function normalizeCommand(command: string) {
+  return command as Command;
+}
 
-  return (command as Command) || null;
+export function getCommand(message: Message): Command | null {
+  const [_, rawCommand, ..._args] = message.content.split('!');
+
+  if (rawCommand === '' || rawCommand === undefined) {
+    return null;
+  }
+
+  const command = normalizeCommand(rawCommand);
+
+  return command;
 }

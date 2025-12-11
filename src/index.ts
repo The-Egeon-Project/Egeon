@@ -121,6 +121,8 @@ client.on('messageCreate', async (message) => {
     const playerHandler = new PlayerHandler(kazagumo);
 
     switch (command) {
+      case Command.HAND_SHAKE:
+        return message.reply('Hi!');
       case Command.SKIP:
         return playerHandler.skip(message);
       default:

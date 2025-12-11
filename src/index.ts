@@ -3,6 +3,9 @@ import dotenv from 'dotenv';
 import { Kazagumo } from 'kazagumo';
 import { Connectors, NodeOption } from 'shoukaku';
 
+import { Command, getCommand, getIsCommand } from './commands';
+import { PlayerHandler } from './playerHandler';
+
 // Load .env only if it exists (local development)
 dotenv.config();
 
@@ -109,65 +112,22 @@ client.on('messageCreate', async (message) => {
     });
   }
 
-  if (message.content.startsWith('!skip')) {
-    let player = kazagumo.players.get(message.guild.id);
-    if (!player) return message.reply('No player found!');
-    player.skip();
-    console.log(message.guild.id);
+  const isCommand = getIsCommand(message);
 
-    return message.reply({
-      content: `Skipped to **${player.queue[0]?.title}** by **${player.queue[0]?.author}**`,
-    });
-  }
+  if (isCommand) {
+    const command = getCommand(message);
 
-  if (
-    message.content.startsWith('!forceplay') ||
-    message.content.startsWith('!fp')
-  ) {
-    let player = kazagumo.players.get(message.guild.id);
-    if (!player) return message.reply('No player found!');
-    const args = message.content.split(' ');
-    const query = args.slice(1).join(' ');
-    let result = await kazagumo.search(query, { requester: message.author });
-    const track = result.tracks[0];
+    if (!command) return;
+    const playerHandler = new PlayerHandler(kazagumo);
 
-    if (!track) return message.reply('No results found!');
-
-    player.play(track);
-
-    return message.reply({
-      content: `Forced playing **${track.title}** by **${track.author}**`,
-    });
-  }
-
-  if (message.content.startsWith('!previous')) {
-    let player = kazagumo.players.get(message.guild.id);
-    if (!player) return message.reply('No player found!');
-    const previous = player.getPrevious(); // we get the previous track without removing it first
-    if (!previous) return message.reply('No previous track found!');
-    await player.play(player.getPrevious(true)); // now we remove the previous track and play it
-    return message.reply('Previous!');
-  }
-
-  if (
-    message.content.startsWith('!pause') ||
-    message.content.startsWith('!stop')
-  ) {
-    let player = kazagumo.players.get(message.guild.id);
-    if (!player) return message.reply('No player found!');
-    player.pause(true);
-
-    return message.reply('Paused!');
-  }
-
-  if (
-    message.content.startsWith('!resume') ||
-    message.content.startsWith('!unpause')
-  ) {
-    let player = kazagumo.players.get(message.guild.id);
-    if (!player) return message.reply('No player found!');
-    player.pause(false);
-    return message.reply('Resumed!');
+    switch (command) {
+      case Command.SKIP:
+        return playerHandler.skip(message);
+      default:
+        return message.reply(
+          `Unknown command: ${command}.\nPlease provide a valid command.`,
+        );
+    }
   }
 });
 

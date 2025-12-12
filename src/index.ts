@@ -89,7 +89,7 @@ client.on('messageCreate', async (discordMessage: DiscordMessage) => {
 
   switch (command) {
     case Command.HAND_SHAKE:
-      return message.reply('Hi!'); //Just health check status of the bot.
+      return message.reply(MESSAGES.HAND_SHAKE);
     case Command.PLAY:
       return playerHandler.play(message);
     case Command.DISCONNECT:

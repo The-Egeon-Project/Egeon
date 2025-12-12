@@ -17,10 +17,7 @@ export class PlayerHandler {
     const query = args.slice(1).join(' ');
 
     const { channel } = message.member.voice;
-    if (!channel)
-      return message.reply(
-        'You need to be in a voice channel to use this command!',
-      );
+    if (!channel) return message.reply(MESSAGES.NO_VOICE_CHANNEL_FOUND);
 
     let player = this.getPlayer(message);
 
@@ -36,7 +33,7 @@ export class PlayerHandler {
       requester: message.author,
     });
     const track = result.tracks[0];
-    if (!track) return message.reply('No results found!');
+    if (!track) return message.reply(MESSAGES.NO_TRACK_FOUND);
 
     if (result.type === 'PLAYLIST')
       player.queue.add(result.tracks); // do this instead of using for loop if you want queueUpdate not spammy
@@ -47,8 +44,8 @@ export class PlayerHandler {
     return message.reply({
       content:
         result.type === 'PLAYLIST'
-          ? `Queued ${result.tracks.length} from ${result.playlistName}`
-          : `Queued ${track.title}`,
+          ? `🎉 Added **${result.tracks.length} songs** from *${result.playlistName}* to the queue!`
+          : `✅ **${track.title}** added to the queue 🎵`,
     });
   }
 
@@ -60,13 +57,13 @@ export class PlayerHandler {
     }
 
     if (player.queue.length === 0) {
-      return message.reply('There is no song in the queue to skip to!');
+      return message.reply(MESSAGES.NO_SONGS_IN_QUEUE_TO_SKIP);
     }
 
     player.skip();
 
     return message.reply({
-      content: `Skipped to **${player.queue[0]?.title}** by **${player.queue[0]?.author}**`,
+      content: `⏭️ Skipping! Now playing **${player.queue[0]?.title}** by **${player.queue[0]?.author}** 🎶`,
     });
   }
 
@@ -79,7 +76,7 @@ export class PlayerHandler {
 
     player.destroy();
 
-    return message.reply('Disconnected!');
+    return message.reply(MESSAGES.DISCONNECTED);
   }
 
   pause(message: Message) {
@@ -88,7 +85,7 @@ export class PlayerHandler {
       return message.reply(MESSAGES.NO_PLAYER_FOUND);
     }
     player.pause(true);
-    return message.reply('Paused!');
+    return message.reply(MESSAGES.PAUSED);
   }
 
   resume(message: Message) {
@@ -98,7 +95,7 @@ export class PlayerHandler {
       return message.reply(MESSAGES.NO_PLAYER_FOUND);
     }
     player.pause(false);
-    return message.reply('Resumed!');
+    return message.reply(MESSAGES.RESUMED);
   }
 
   queue(message: Message) {
@@ -119,9 +116,9 @@ export class PlayerHandler {
     const duration = getDuration(rawDuration);
 
     return message.reply(
-      `Current song: ${current?.title}\n` +
-        `Queue:\n${queue.map((track, index) => `${index + 1}. ${track.title}.`).join('\n')}\n` +
-        `Total songs: ${queue.length}, duration: ${duration}`,
+      `🎵 **Now playing:** ${current?.title}\n\n` +
+        `📋 **Queue:**\n${queue.map((track, index) => `\`${index + 1}.\` ${track.title}`).join('\n')}\n\n` +
+        `📊 **Total:** ${queue.length} songs | ⏱️ **Duration:** ${duration}`,
     );
   }
 }

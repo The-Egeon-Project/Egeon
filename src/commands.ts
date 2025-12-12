@@ -39,14 +39,14 @@ export const ALIASES_FOR_COMMANDS = keys.reduce(
 );
 
 export const COMMANDS_DESCRIPTIONS: Record<Command, string> = {
-  [Command.HAND_SHAKE]: 'Health check status of the bot.',
-  [Command.PLAY]: 'Play a song.',
-  [Command.SKIP]: 'Skip the current song.',
-  [Command.PAUSE]: 'Pause the current song.',
-  [Command.RESUME]: 'Resume the current song.',
-  [Command.DISCONNECT]: 'Disconnect the player from the voice channel.',
-  [Command.QUEUE]: 'Show queue info.',
-  [Command.HELP]: 'Show the help message.',
+  [Command.HAND_SHAKE]: 'Am I alive? Say hi and find out! 👋',
+  [Command.PLAY]: 'Play a song or add it to the queue 🎶',
+  [Command.SKIP]: 'Skip to the next song ⏭️',
+  [Command.PAUSE]: 'Pause the music for a bit ⏸️',
+  [Command.RESUME]: 'Resume the music where you left off ▶️',
+  [Command.DISCONNECT]: 'Kick me out of the voice channel 👋😢',
+  [Command.QUEUE]: 'Check out what songs are in the queue 📋',
+  [Command.HELP]: 'Show this help message 📖',
 };
 
 export function getIsCommand(message: Message) {

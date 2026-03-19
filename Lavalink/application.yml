@@ -25,7 +25,6 @@ plugins:
       - WEBEMBEDDED
       - ANDROID_VR
       - TV
-      - TVHTML5EMBEDDED
     oauth:
       enabled: true
       skipInitialization: true

@@ -193,35 +193,43 @@ kazagumo.on('playerEnd', (player) => {
 });
 
 client.on('messageCreate', async (discordMessage: DiscordMessage) => {
-  const isValidDiscordMessage = getIsValidDiscordMessage(discordMessage);
-  if (!isValidDiscordMessage) return;
+  if (!getIsValidDiscordMessage(discordMessage)) return;
 
   const message = discordMessage as Message;
   const isCommand = getIsCommand(message);
   const command = getCommand(message);
 
   if (!isCommand || !command) return;
+
   const playerHandler = new PlayerHandler(kazagumo);
 
   switch (command) {
     case Command.HAND_SHAKE:
-      return message.reply(MESSAGES.HAND_SHAKE);
+      await message.reply(MESSAGES.HAND_SHAKE);
+      break;
     case Command.PLAY:
-      return playerHandler.play(message);
+      await playerHandler.play(message);
+      break;
     case Command.DISCONNECT:
-      return playerHandler.disconnect(message);
+      await playerHandler.disconnect(message);
+      break;
     case Command.SKIP:
-      return playerHandler.skip(message);
+      await playerHandler.skip(message);
+      break;
     case Command.PAUSE:
-      return playerHandler.pause(message);
+      await playerHandler.pause(message);
+      break;
     case Command.RESUME:
-      return playerHandler.resume(message);
+      await playerHandler.resume(message);
+      break;
     case Command.QUEUE:
-      return playerHandler.queue(message);
+      await playerHandler.queue(message);
+      break;
     case Command.HELP:
-      return message.reply(MESSAGES.VALID_COMMANDS);
+      await message.reply(MESSAGES.VALID_COMMANDS);
+      break;
     default:
-      return message.reply(MESSAGES.UNKNOWN_COMMAND);
+      await message.reply(MESSAGES.UNKNOWN_COMMAND);
   }
 });
 

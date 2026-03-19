@@ -47,9 +47,5 @@ type NotNull<T> = {
 export type Message = NotNull<DiscordMessage>;
 
 export function getIsValidDiscordMessage(discordMessage: DiscordMessage) {
-  return (
-    !discordMessage.author.bot ||
-    discordMessage.guild !== null ||
-    discordMessage.member !== null
-  );
+  return !discordMessage.author.bot && discordMessage.inGuild();
 }

@@ -17,7 +17,7 @@ export class PlayerHandler {
     const args = message.content.split(' ');
     const query = args.slice(1).join(' ');
 
-    const { channel } = message.member.voice;
+    const channel = message.member?.voice.channel;
     if (!channel) return message.reply(MESSAGES.NO_VOICE_CHANNEL_FOUND);
 
     let player = this.getPlayer(message);

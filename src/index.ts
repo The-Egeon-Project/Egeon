@@ -20,6 +20,7 @@ const { Guilds, GuildVoiceStates, GuildMessages, MessageContent } =
   GatewayIntentBits;
 
 const TIMEOUT = 15;
+const IDLE_TIMEOUT = 10 * 60;
 // Determine if should use secure connection.
 const isSecure = process.env.LAVALINK_SECURE === 'true';
 
@@ -88,7 +89,7 @@ kazagumo.shoukaku.on('disconnect', (name) => {
 // Track alone timeout - disconnect bot if alone in voice channel for TIMEOUT seconds
 const aloneTimeouts = new Map<string, NodeJS.Timeout>();
 
-// Track idle timeout - disconnect bot if queue is empty for TIMEOUT seconds
+// Track idle timeout - disconnect bot if queue is empty for IDLE_TIMEOUT seconds
 const idleTimeouts = new Map<string, NodeJS.Timeout>();
 
 client.on('voiceStateUpdate', (oldState: VoiceState, newState: VoiceState) => {
@@ -168,7 +169,7 @@ kazagumo.on('playerStart', (player, track) => {
 kazagumo.on('playerEnd', (player) => {
   // Check if queue is empty
   if (player.queue.length === 0) {
-    // Start 30 second timeout to disconnect
+    // Start 10 minute timeout to disconnect
     if (!idleTimeouts.has(player.guildId)) {
       const timeout = setTimeout(() => {
         const currentPlayer = kazagumo.players.get(player.guildId);
@@ -182,11 +183,11 @@ kazagumo.on('playerEnd', (player) => {
           currentPlayer.destroy();
         }
         idleTimeouts.delete(player.guildId);
-      }, TIMEOUT * 1000);
+      }, IDLE_TIMEOUT * 1000);
 
       idleTimeouts.set(player.guildId, timeout);
       console.log(
-        `Guild ${player.guildId}: Queue empty, starting ${TIMEOUT}s idle disconnect timer.`,
+        `Guild ${player.guildId}: Queue empty, starting ${IDLE_TIMEOUT}s idle disconnect timer.`,
       );
     }
   }
@@ -209,6 +210,9 @@ client.on('messageCreate', async (discordMessage: DiscordMessage) => {
       break;
     case Command.PLAY:
       await playerHandler.play(message);
+      break;
+    case Command.PLAY_NEXT:
+      await playerHandler.play(message, true);
       break;
     case Command.DISCONNECT:
       await playerHandler.disconnect(message);

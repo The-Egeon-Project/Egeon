@@ -3,6 +3,7 @@ import { Message } from './messages.js';
 export enum Command {
   HAND_SHAKE = 'handshake',
   PLAY = 'play',
+  PLAY_NEXT = 'playnext',
   SKIP = 'skip',
   PAUSE = 'pause',
   RESUME = 'resume',
@@ -14,6 +15,7 @@ export enum Command {
 export const COMMANDS_ALIASSES: Record<string, Command> = {
   hs: Command.HAND_SHAKE,
   p: Command.PLAY,
+  pn: Command.PLAY_NEXT,
   sk: Command.SKIP,
   pa: Command.PAUSE,
   re: Command.RESUME,
@@ -41,6 +43,8 @@ export const ALIASES_FOR_COMMANDS = keys.reduce(
 export const COMMANDS_DESCRIPTIONS: Record<Command, string> = {
   [Command.HAND_SHAKE]: 'Am I alive? Say hi and find out! 👋',
   [Command.PLAY]: 'Play a song or add it to the queue 🎶',
+  [Command.PLAY_NEXT]:
+    'Add a song or playlist next in the queue without interrupting playback: !playnext <query> ⏭️',
   [Command.SKIP]: 'Skip to the next song ⏭️',
   [Command.PAUSE]: 'Pause the music for a bit ⏸️',
   [Command.RESUME]: 'Resume the music where you left off ▶️',

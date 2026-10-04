@@ -13,9 +13,13 @@ export class PlayerHandler {
   }
 
   // Player Functions
-  async play(message: Message) {
+  async play(message: Message, playNext = false) {
     const args = message.content.split(' ');
     const query = args.slice(1).join(' ');
+
+    if (playNext && !query.trim()) {
+      return message.reply('🎵 Usage: `!pn <song name or URL>`');
+    }
 
     const channel = message.member?.voice.channel;
     if (!channel) return message.reply(MESSAGES.NO_VOICE_CHANNEL_FOUND);
@@ -38,9 +42,24 @@ export class PlayerHandler {
     const isPlaylist = result.type === 'PLAYLIST';
     if (!track) return message.reply(MESSAGES.NO_TRACK_FOUND);
 
-    queue.add(isPlaylist ? result.tracks : track);
+    if (playNext) {
+      const pendingTracks = [...queue];
+      queue.splice(0, queue.length);
+      queue.add(isPlaylist ? [...result.tracks] : track);
+      queue.add(pendingTracks);
+    } else {
+      queue.add(isPlaylist ? result.tracks : track);
+    }
 
     if (!player.playing && !player.paused) player.play();
+
+    if (playNext) {
+      return message.reply({
+        content: isPlaylist
+          ? `⏭️ Added **${result.tracks.length} songs** from *${result.playlistName}* to play next!`
+          : `⏭️ **${track.title}** added to play next!`,
+      });
+    }
 
     if (_.isEmpty(queue)) {
       return;

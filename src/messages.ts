@@ -9,6 +9,12 @@ import {
 
 // Dictionary of common messages.
 export const MESSAGES = {
+  VOICE_CONNECTING:
+    '⏳ I am connecting to your voice channel. Please wait a moment.',
+  LAVALINK_UNAVAILABLE:
+    '⏳ The music server is reconnecting. Please try again in a few seconds.',
+  COMMAND_FAILED:
+    '❌ I could not complete that command. Please try again in a moment.',
   NO_PLAYER_FOUND:
     "🤔 Hmm... there's no active player. Start playing something with `!play` first!",
   NO_VOICE_CHANNEL_FOUND:

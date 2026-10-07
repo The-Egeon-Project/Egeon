@@ -49,7 +49,20 @@ const kazagumo = new Kazagumo(
   Nodes,
 );
 
-client.on('clientReady', () => console.log(client.user?.tag + ' Ready!'));
+client.once('clientReady', () => {
+  console.log(client.user?.tag + ' Ready!');
+
+  // Shoukaku removes nodes after exhausting its connection attempts.
+  // Restore missing nodes so a longer Lavalink outage can recover.
+  setInterval(() => {
+    for (const node of Nodes) {
+      if (!kazagumo.shoukaku.nodes.has(node.name)) {
+        console.log(`Lavalink ${node.name}: Retrying connection.`);
+        kazagumo.shoukaku.addNode(node);
+      }
+    }
+  }, 10_000).unref();
+});
 
 kazagumo.shoukaku.on('ready', (name) =>
   console.log(`Lavalink ${name}: Ready!`),
@@ -204,36 +217,46 @@ client.on('messageCreate', async (discordMessage: DiscordMessage) => {
 
   const playerHandler = new PlayerHandler(kazagumo);
 
-  switch (command) {
-    case Command.HAND_SHAKE:
-      await message.reply(MESSAGES.HAND_SHAKE);
-      break;
-    case Command.PLAY:
-      await playerHandler.play(message);
-      break;
-    case Command.PLAY_NEXT:
-      await playerHandler.play(message, true);
-      break;
-    case Command.DISCONNECT:
-      await playerHandler.disconnect(message);
-      break;
-    case Command.SKIP:
-      await playerHandler.skip(message);
-      break;
-    case Command.PAUSE:
-      await playerHandler.pause(message);
-      break;
-    case Command.RESUME:
-      await playerHandler.resume(message);
-      break;
-    case Command.QUEUE:
-      await playerHandler.queue(message);
-      break;
-    case Command.HELP:
-      await message.reply(MESSAGES.VALID_COMMANDS);
-      break;
-    default:
-      await message.reply(MESSAGES.UNKNOWN_COMMAND);
+  try {
+    switch (command) {
+      case Command.HAND_SHAKE:
+        await message.reply(MESSAGES.HAND_SHAKE);
+        break;
+      case Command.PLAY:
+        await playerHandler.play(message);
+        break;
+      case Command.PLAY_NEXT:
+        await playerHandler.play(message, true);
+        break;
+      case Command.DISCONNECT:
+        await playerHandler.disconnect(message);
+        break;
+      case Command.SKIP:
+        await playerHandler.skip(message);
+        break;
+      case Command.PAUSE:
+        await playerHandler.pause(message);
+        break;
+      case Command.RESUME:
+        await playerHandler.resume(message);
+        break;
+      case Command.QUEUE:
+        await playerHandler.queue(message);
+        break;
+      case Command.HELP:
+        await message.reply(MESSAGES.VALID_COMMANDS);
+        break;
+      default:
+        await message.reply(MESSAGES.UNKNOWN_COMMAND);
+    }
+  } catch (error) {
+    console.error(
+      `Guild ${message.guild.id}: Command ${command} failed.`,
+      error,
+    );
+    await message.reply(MESSAGES.COMMAND_FAILED).catch((replyError) => {
+      console.error('Failed to send command error reply.', replyError);
+    });
   }
 });
 

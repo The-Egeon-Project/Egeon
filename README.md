@@ -1,8 +1,54 @@
 # Egeon
 
-Bot de música para Discord escrito en TypeScript. Permite buscar canciones en YouTube, reproducir enlaces y playlists, administrar una cola por servidor y controlar la reproducción desde el chat.
+**Bot de música para Discord desarrollado con TypeScript, Node.js y Lavalink.**
 
-Egeon recibe los comandos con **discord.js** y administra los reproductores mediante **Kazagumo** y **Shoukaku**. **Lavalink v4** se ejecuta como un servicio separado y procesa el audio.
+Egeon permite buscar música, reproducir canciones o playlists y administrar una cola independiente por servidor de Discord mediante comandos de texto. La reproducción de audio se delega a **Lavalink v4**; el bot coordina los comandos y el estado de cada reproductor con **discord.js**, **Kazagumo** y **Shoukaku**.
+
+## El proyecto de un vistazo
+
+| Área | Implementación |
+| --- | --- |
+| Lenguaje y runtime | TypeScript · Node.js 20 |
+| Integración con Discord | discord.js |
+| Gestión de reproductores | Kazagumo · Shoukaku |
+| Servicio de audio | Lavalink v4 · YouTube Source |
+| Ejecución | Docker · Docker Compose |
+
+### Funcionalidades principales
+
+- Reproducción y búsqueda por nombre o URL, con soporte de playlists según las fuentes disponibles.
+- Cola por servidor: agregar, reproducir a continuación, pausar, reanudar, saltar y consultar canciones pendientes.
+- Desconexión automática cuando el canal queda sin usuarios o cuando la cola permanece vacía.
+- Manejo de errores de conexión y reintentos al recuperar nodos de Lavalink.
+
+### Arquitectura
+
+```text
+Usuarios de Discord
+       │ comandos de texto y canales de voz
+       ▼
+Bot Egeon (TypeScript + discord.js)
+       │ estado, colas y reproductores
+       ▼
+Kazagumo + Shoukaku
+       │ conexión con el servidor de audio
+       ▼
+Lavalink v4 + YouTube Source
+```
+
+### Decisiones técnicas destacadas
+
+- **Separación de responsabilidades:** la lógica de Discord y los comandos viven en el bot, mientras Lavalink se encarga del audio.
+- **Estado por servidor:** cada comunidad puede gestionar su propia cola y reproducción.
+- **Recuperación ante fallas:** se detectan desconexiones de Lavalink y se reintenta incorporar los nodos.
+- **Gestión de recursos:** temporizadores liberan la conexión cuando el bot queda solo en voz o sin música pendiente.
+- **Despliegue reproducible:** Docker Compose administra los servicios y espera el estado saludable de Lavalink.
+
+> **Estado del proyecto:** funciona con una cuenta de bot de Discord y una instancia de Lavalink correctamente configuradas. El build de TypeScript está disponible; todavía no hay una suite de tests automatizados. La disponibilidad de fuentes externas de música depende de Lavalink y sus plugins.
+
+**Ir a:** [Funciones](#funciones) · [Requisitos](#requisitos) · [Configuración de Discord](#configuración-de-discord) · [Ejecutar con Docker Compose](#ejecutar-con-docker-compose) · [Comandos](#comandos) · [Desarrollo y validación](#desarrollo-y-validación)
+
+---
 
 ## Funciones
 
